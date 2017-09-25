@@ -679,3 +679,44 @@ function isExit( param ){
     return true;
   return false;
 }
+
+var Tools ={
+    hasZh: function(str){
+        for(var i = 0;i < str.length; i++)
+        {
+            if(str.charCodeAt(i) > 255) //如果是汉字，则字符串长度加2
+                return true;
+            return false;
+        }
+    },
+    getlen: function(str){
+        var strlen = 0;
+        for(var i = 0;i < str.length; i++)
+        {
+            if(str.charCodeAt(i) > 255) //如果是汉字，则字符串长度加2
+                strlen += 2;
+            else
+                strlen++;
+        }
+        return strlen;
+    },
+    //限制长度，中文2，英文1
+    limitlen: function(str, len){
+        var result = "";
+        var strlen = 0;
+        for(var i = 0;i < str.length; i++)
+        {
+            if(str.charCodeAt(i) > 255) //如果是汉字，则字符串长度加2
+                strlen += 2;
+            else
+                strlen++;
+
+            result += str.substr(i,1);
+
+            if(strlen >= len){
+                break;
+            }
+        }
+        return result;
+    }
+}
