@@ -99,9 +99,6 @@ http://realauto.testin.cn/nativeapp.action?op=App.list
 账号liyunyang@testin.cn   密码guojing907@#
 
 
-
-
-https://static.vivo.com.cn/h5/x20lh/
 阿里云
 ssh:
 
@@ -113,3 +110,13 @@ u3G4lDv6
 内网IP: 10.80.9.49
 用户 root
 密码 Ajs1G2vGKkbgcCqF
+
+测试环境数据库: http://test.vivo.com.cn/pma/
+测试环境数据库用户root，密码 Msmds32WYDAPyney
+测试环境地址: http://test.vivo.com.cn/ 
+
+阿里云OSS
+access_key_id: LTAIH7XLyYABGJcd           
+access_key_secret: zhoxiaHqR0tksqRiipRSzOFEegrJhJ
+bucket：vivo-oss-fyj
+位置：深圳
