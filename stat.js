@@ -1,5 +1,5 @@
 /*
- * 添加全局变量tStat，使用腾讯统计
+ * 添加全局变量mtaStat，使用腾讯统计
  * 自动统计预设时间点的用户留存率
  *
  * loadComplete: 统计用户加载时间
@@ -11,29 +11,24 @@
  *
  * firstInteraction: 首次互动时调用，可以多个地方调用，但只会上报一次，结合vv可以计算跳出率
  *
- *
+ * getShareLink: 生成微信分享链接，带渠道和分享标识
  * 二次分享
 **/
 (function(w){
-    w.tStat = w.tStat || {};
+    w.mtaStat = w.mtaStat || {};
 
     var eventName = {
         stayTime: "STAYTIME",
         loadComplete: "LOADCOMPLETE",
         firstInteraction: "FIRSTINTERACTION",
+        fromWXshare: "FROMWXSHARE",
     }
 
     var startTime = new Date().getTime();
 
-    function stat(action, param){
-        if(typeof MtaH5 != "undefined"){
-            param ? MtaH5.clickStat(action, param) : MtaH5.clickStat(action);
-        }
-    }
-
     //统计预设时间点的用户留存率
     (function(){
-        var timePoint = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 40, 50, 60];
+        var timePoint = [5, 10, 15, 20, 30, 40, 50, 60];
         var count = 0;
 
         stat(eventName.stayTime, {time: 0})
@@ -51,7 +46,15 @@
         }, 1000)
     })()
 
-    w.tStat.load = {
+    //统计由微信分享链接进入的用户
+    (function(){
+        var hash = location.hash;
+        if(hash.toLowerCase().indexOf(eventName.fromWXshare.toLowerCase()) >= 0){
+            stat(eventName.fromWXshare);
+        }
+    })()
+
+    w.mtaStat.load = {
         start: function(){
             startTime = new Date().getTime();
         },
@@ -65,11 +68,40 @@
         }
     };
 
-    w.tStat.firstInteraction = function(){
+    w.mtaStat.firstInteraction = function(){
         if(eventName.firstInteraction){
             stat(eventName.firstInteraction);
             delete eventName.firstInteraction;
         }
     }
 
+
+    w.mtaStat.getShareLink = function(baseLink){
+        var ADTAG = getQueryString("ADTAG");
+
+        var link = baseLink + (ADTAG ? "?ADTAG="+ADTAG : ""),
+
+        link += "#"+eventName.fromWXshare;
+
+        return link;
+    }
+
+
+    function stat(action, param){
+        if(typeof MtaH5 != "undefined"){
+            param ? MtaH5.clickStat(action, param) : MtaH5.clickStat(action);
+        }
+    }
+
+    //获取url参数
+    function getQueryString(name){
+        var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+        //解析中文
+        var link = decodeURI(window.location.search);
+        var r = link.substr(1).match(reg);
+        if( r!=null )
+            return  unescape(r[2]);
+        return null;
+    }
 })(this)
+
