@@ -19,7 +19,7 @@ function statSave (action,type){
  *
 */
 
-function preLoad( option ){
+function Preload( option ){
     this.startTime =  0;        //开始时间
     this.endTime =  0;          //结束时间
     this.progress =  0;
@@ -35,7 +35,7 @@ function preLoad( option ){
         this.init();
     }
 }
-preLoad.prototype = {
+Preload.prototype = {
     init:function(){
         //页面图片的加载
         this.startTime = Date.now();
@@ -392,100 +392,147 @@ function getPageApi(url,postData,callback,param){
     }
 }
 
-//判断终端类型
-function IsPC()  {
-    var userAgentInfo = navigator.userAgent;
-    var Agents = new Array("Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod", "Nokia");
-    var flag = true;
-    for (var i = 0; i < Agents.length; i++) {
-        if (userAgentInfo.indexOf(Agents[i]) >= 0) {
-            flag = false;
-            break;
+
+var Tools = {
+    //判断终端类型是否PC端
+    isPC: function(){
+        var userAgentInfo = navigator.userAgent;
+        var Agents = new Array("Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod", "Nokia");
+        var flag = true;
+        for (var i = 0; i < Agents.length; i++) {
+            if (userAgentInfo.indexOf(Agents[i]) >= 0) {
+                flag = false;
+                break;
+            }
+        }
+        return flag;
+    },
+    isIOS: function(){
+        var userAgentInfo = navigator.userAgent;
+        var Agents = new Array("iPhone", "iPad", "iPod");
+        var flag = false;
+        for (var i = 0; i < Agents.length; i++) {
+            if (userAgentInfo.indexOf(Agents[i]) >= 0) {
+                flag = true;
+                break;
+            }
+        }
+        return flag;
+    },
+    isVivoSpace: function(){
+        var userAgentInfo = navigator.userAgent.toLowerCase();
+        return userAgentInfo.indexOf("vivospace") >= 0;
+    },
+    isVivoBrowser: function(){
+        var userAgentInfo = navigator.userAgent.toLowerCase();
+        return userAgentInfo.indexOf("vivobrowser") >= 0;
+    },
+    //是否能进行长按保存操作
+    canLongtap: function(){
+        var userAgentInfo = navigator.userAgent.toLowerCase();
+        var device = ["vivospace", "vivobrowser", "weibo"];
+        for( var i in device ){
+            if( userAgentInfo.indexOf(device[i]) >= 0 ){
+                return false;
+            }
+        }
+        return true;
+    },
+    getRandom: function(a , b , toFixNum){
+        if(a>b){
+            a= [b, b=a][0];
+        }
+        if(!toFixNum){
+            var rand = Math.floor(Math.random()*(b-a+1)) + a;
+            return rand;
+        }else{
+            var n = Math.random()*(b-a)+a;
+            return Number(n.toFixed(toFixNum));
+        }
+    },
+    getWinSize: function(){
+        var winWidth = 0 , winHeight = 0;
+
+        if (window.innerWidth && window.innerHeight){
+            winWidth = window.innerWidth;
+            winHeight = window.innerHeight;
+        }
+        else if ((document.body) && (document.body.clientWidth) && (document.body.clientHeight)){
+            winWidth = document.body.clientWidth;
+            winHeight = document.body.clientHeight;
+        }
+
+        // 通过深入 Document 内部对 body 进行检测，获取窗口大小
+        if (document.documentElement && document.documentElement.clientHeight && document.documentElement.clientWidth){
+            winHeight = document.documentElement.clientHeight;
+            winWidth = document.documentElement.clientWidth;
+        }
+        return {
+            width: winWidth,
+            height: winHeight
+        }
+    },
+    getQueryString: function(name){
+        var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+        //解析中文
+        var link = decodeURI(window.location.search);
+        var r = link.substr(1).match(reg);
+        if( r!=null )
+            return  unescape(r[2]);
+        return null;
+    },
+    isExit: function( param ){
+        if( typeof param != 'undefined' )
+            return true;
+        return false;
+    },
+    randomChild: function (array){
+        if( array instanceof Array && array.length > 0 ){
+            return array[Tools.getRandom(0, array.length-1)];
+        }
+        return null;
+    },
+    //汉字字符串长度判断
+    charHandlers: function(){
+        hasZh: function(str){
+            for(var i = 0;i < str.length; i++)
+            {
+                if(str.charCodeAt(i) > 255) //如果是汉字，则字符串长度加2
+                    return true;
+                return false;
+            }
+        },
+        getlen: function(str){
+            var strlen = 0;
+            for(var i = 0;i < str.length; i++)
+            {
+                if(str.charCodeAt(i) > 255) //如果是汉字，则字符串长度加2
+                    strlen += 2;
+                else
+                    strlen++;
+            }
+            return strlen;
+        },
+        //限制长度，中文2，英文1
+        limitlen: function(str, len){
+            var result = "";
+            var strlen = 0;
+            for(var i = 0;i < str.length; i++)
+            {
+                if(str.charCodeAt(i) > 255) //如果是汉字，则字符串长度加2
+                    strlen += 2;
+                else
+                    strlen++;
+
+                result += str.substr(i,1);
+
+                if(strlen >= len){
+                    break;
+                }
+            }
+            return result;
         }
     }
-    return flag;
-}
-
-function IsIOS()  {
-    var userAgentInfo = navigator.userAgent;
-    var Agents = new Array("iPhone", "iPad", "iPod");
-    var flag = false;
-    for (var i = 0; i < Agents.length; i++) {
-        if (userAgentInfo.indexOf(Agents[i]) >= 0) {
-            flag = true;
-            break;
-        }
-    }
-    return flag;
-}
-
-function IsVivoSpace()  {
-    var userAgentInfo = navigator.userAgent.toLowerCase();
-    return userAgentInfo.indexOf("vivospace") >= 0;
-}
-
-function IsVivoBrowser()  {
-    var userAgentInfo = navigator.userAgent.toLowerCase();
-    return userAgentInfo.indexOf("vivobrowser") >= 0;
-}
-
-function canLongtap () {
-    var userAgentInfo = navigator.userAgent.toLowerCase();
-    var device = ["vivospace", "vivobrowser", "weibo"];
-    for( var i in device ){
-        if( userAgentInfo.indexOf(device[i]) >= 0 ){
-            return false;
-        }
-    }
-    return true;
-}
-
-//随机数
-function getRandom(a , b , toFixNum){
-    if(a>b){
-        a= [b, b=a][0];
-    }
-    if(!toFixNum){
-        var rand = Math.floor(Math.random()*(b-a+1)) + a;
-        return rand;
-    }else{
-        var n = Math.random()*(b-a)+a;
-        return Number(n.toFixed(toFixNum));
-    }
-}
-
-function getWinSize(){
-    var winWidth = 0 , winHeight = 0;
-
-    if (window.innerWidth && window.innerHeight){
-        winWidth = window.innerWidth;
-        winHeight = window.innerHeight;
-    }
-    else if ((document.body) && (document.body.clientWidth) && (document.body.clientHeight)){
-        winWidth = document.body.clientWidth;
-        winHeight = document.body.clientHeight;
-    }
-
-    // 通过深入 Document 内部对 body 进行检测，获取窗口大小
-    if (document.documentElement && document.documentElement.clientHeight && document.documentElement.clientWidth){
-        winHeight = document.documentElement.clientHeight;
-        winWidth = document.documentElement.clientWidth;
-    }
-    return {
-        width: winWidth,
-        height: winHeight
-    };
-}
-
-//获取url参数
-function GetQueryString(name){
-    var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
-    //解析中文
-    var link = decodeURI(window.location.search);
-    var r = link.substr(1).match(reg);
-    if( r!=null )
-        return  unescape(r[2]);
-    return null;
 }
 
 var support = (window.Modernizr && Modernizr.touch === true) || (function () {
@@ -715,59 +762,4 @@ function addShareJs( apiArr ){
             nBody.appendChild(node);
         }
     }
-}
-
-function isExit( param ){
-    if( typeof param != 'undefined' )
-        return true;
-    return false;
-}
-
-//汉字字符串长度判断
-var Tools ={
-    hasZh: function(str){
-        for(var i = 0;i < str.length; i++)
-        {
-            if(str.charCodeAt(i) > 255) //如果是汉字，则字符串长度加2
-                return true;
-            return false;
-        }
-    },
-    getlen: function(str){
-        var strlen = 0;
-        for(var i = 0;i < str.length; i++)
-        {
-            if(str.charCodeAt(i) > 255) //如果是汉字，则字符串长度加2
-                strlen += 2;
-            else
-                strlen++;
-        }
-        return strlen;
-    },
-    //限制长度，中文2，英文1
-    limitlen: function(str, len){
-        var result = "";
-        var strlen = 0;
-        for(var i = 0;i < str.length; i++)
-        {
-            if(str.charCodeAt(i) > 255) //如果是汉字，则字符串长度加2
-                strlen += 2;
-            else
-                strlen++;
-
-            result += str.substr(i,1);
-
-            if(strlen >= len){
-                break;
-            }
-        }
-        return result;
-    }
-}
-
-function randomChild(array){
-    if( array instanceof Array && array.length > 0 ){
-        return array[getRandom(0, array.length-1)];
-    }
-    return null;
 }
